@@ -77,12 +77,28 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    return f"Welcome, {session['username']}. Posts coming soon."
+    db = get_db()
+
+    if request.method == "POST":
+        content = request.form["content"].strip()
+        if content:
+            db.execute(
+                "INSERT INTO posts (user_id, content) VALUES (?, ?)",
+                (session["user_id"], content),
+            )
+            db.commit()
+        return redirect(url_for("index"))
+
+    posts = db.execute(
+        "SELECT id, content, created_at FROM posts ORDER BY created_at DESC"
+    ).fetchall()
+
+    return render_template("index.html", posts=posts, username=session["username"])
 
 
 if __name__ == "__main__":
