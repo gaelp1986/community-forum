@@ -21,8 +21,8 @@ python app.py
 Then visit http://localhost:5000
 
 ## Built with
-Developed using an AI-assisted workflow with Claude Code (Anthropic
-"Claude Code in Action" certified) — AI-accelerated scaffolding with
+Python,SQL,HTML
+ — AI-accelerated scaffolding with
 human-owned auth and data logic.
 
 Originally built at All Star Code (2023); rebuilt with real
