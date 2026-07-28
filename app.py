@@ -95,7 +95,12 @@ def index():
         return redirect(url_for("index"))
 
     posts = db.execute(
-        "SELECT id, content, created_at FROM posts ORDER BY created_at DESC"
+        """
+        SELECT posts.id, posts.content, posts.created_at, users.username
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+        ORDER BY posts.created_at DESC
+        """
     ).fetchall()
 
     return render_template("index.html", posts=posts, username=session["username"])

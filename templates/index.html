@@ -20,7 +20,7 @@
       {% for post in posts %}
         <article class="post">
           <p class="post-content">{{ post.content }}</p>
-          <p class="post-meta">{{ post.created_at }}</p>
+          <p class="post-meta">{{ post.username }} · {{ post.created_at }}</p>
         </article>
       {% else %}
         <p class="empty">No posts yet. Be the first to say something.</p>
