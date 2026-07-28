@@ -1,5 +1,6 @@
 import sqlite3
-from flask import Flask, g
+from flask import Flask, g, redirect, render_template, request, url_for
+from werkzeug.security import generate_password_hash
 
 DATABASE = "forum.db"
 
@@ -26,6 +27,30 @@ def init_db():
     with open("schema.sql") as f:
         db.executescript(f.read())
     db.close()
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        if not username or not password:
+            return render_template("register.html", error="Username and password are required.")
+
+        db = get_db()
+        existing = db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+        if existing:
+            return render_template("register.html", error="That username is already taken.")
+
+        password_hash = generate_password_hash(password)
+        db.execute(
+            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+            (username, password_hash),
+        )
+        db.commit()
+        return redirect(url_for("register"))
+
+    return render_template("register.html")
 
 
 @app.route("/")
