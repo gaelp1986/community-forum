@@ -66,7 +66,7 @@ def login():
 
         session["user_id"] = user["id"]
         session["username"] = user["username"]
-        return redirect(url_for("hello"))
+        return redirect(url_for("index"))
 
     return render_template("login.html")
 
@@ -78,8 +78,11 @@ def logout():
 
 
 @app.route("/")
-def hello():
-    return "Community Forum — coming soon."
+def index():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return f"Welcome, {session['username']}. Posts coming soon."
 
 
 if __name__ == "__main__":
