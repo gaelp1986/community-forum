@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Community Forum</title>
+  <title>The Stoop</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header>
-    <h1>Community Forum</h1>
+    <h1>The Stoop</h1>
     {% if username %}
       <p class="session-info">logged in as {{ username }} · <a href="{{ url_for('logout') }}">logout</a></p>
     {% else %}

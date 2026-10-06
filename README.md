@@ -1,5 +1,5 @@
-# Community Discussion Forum
-Full-stack forum with user authentication — Flask, SQLite, HTML/CSS.
+# The Stoop
+A full-stack community discussion forum with user authentication — Flask, SQLite, HTML/CSS.
 
 **Live:** https://gaelp2807.pythonanywhere.com
 
