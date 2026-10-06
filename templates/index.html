@@ -18,7 +18,8 @@
   <main>
     {% if username %}
       <form method="POST" class="post-form">
-        <textarea name="content" placeholder="Share something with the community..." required></textarea>
+        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+        <textarea name="content" placeholder="Share something with the community..." required>{{ draft }}</textarea>
         <button type="submit">Post</button>
       </form>
     {% endif %}

@@ -8,6 +8,7 @@ A full-stack community discussion forum with user authentication — Flask, SQLi
 - Sessions stored in signed cookies
 - Post feed with author attribution (SQL JOIN across users/posts)
 - Public read-only feed; posting requires an account
+- Per-user rate limit on posting (5 posts per 10 minutes)
 
 ## Auth design
 Passwords are never stored — only salted hashes. Login re-hashes the

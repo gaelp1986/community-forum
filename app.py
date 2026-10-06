@@ -10,6 +10,10 @@ DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "forum.db"))
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
+# Each user may make at most POST_LIMIT posts in any POST_WINDOW_MINUTES.
+POST_LIMIT = 5
+POST_WINDOW_MINUTES = 10
+
 
 def get_db():
     if "db" not in g:
@@ -86,18 +90,34 @@ def logout():
 @app.route("/", methods=["GET", "POST"])
 def index():
     db = get_db()
+    error = None
+    draft = ""
 
     if request.method == "POST":
         if "user_id" not in session:
             return redirect(url_for("login"))
         content = request.form["content"].strip()
-        if content:
-            db.execute(
-                "INSERT INTO posts (user_id, content) VALUES (?, ?)",
-                (session["user_id"], content),
+        recent = db.execute(
+            """
+            SELECT COUNT(*) FROM posts
+            WHERE user_id = ? AND created_at > datetime('now', ?)
+            """,
+            (session["user_id"], f"-{POST_WINDOW_MINUTES} minutes"),
+        ).fetchone()[0]
+        if recent >= POST_LIMIT:
+            error = (
+                f"You can post up to {POST_LIMIT} times every "
+                f"{POST_WINDOW_MINUTES} minutes. Try again in a few minutes."
             )
-            db.commit()
-        return redirect(url_for("index"))
+            draft = content
+        else:
+            if content:
+                db.execute(
+                    "INSERT INTO posts (user_id, content) VALUES (?, ?)",
+                    (session["user_id"], content),
+                )
+                db.commit()
+            return redirect(url_for("index"))
 
     posts = db.execute(
         """
@@ -108,7 +128,13 @@ def index():
         """
     ).fetchall()
 
-    return render_template("index.html", posts=posts, username=session.get("username"))
+    return render_template(
+        "index.html",
+        posts=posts,
+        username=session.get("username"),
+        error=error,
+        draft=draft,
+    )
 
 
 if __name__ == "__main__":
