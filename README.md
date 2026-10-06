@@ -1,16 +1,19 @@
 # Community Discussion Forum
-Full-stack forum with user authentication — Flask, SQLite, vanilla JS/HTML/CSS.
+Full-stack forum with user authentication — Flask, SQLite, HTML/CSS.
+
+**Live:** https://gaelp2807.pythonanywhere.com
 
 ## Features
 - User registration & login with salted password hashing (werkzeug)
-- Server-side sessions via signed cookies
+- Sessions stored in signed cookies
 - Post feed with author attribution (SQL JOIN across users/posts)
 - Public read-only feed; posting requires an account
 
 ## Auth design
 Passwords are never stored — only salted hashes. Login re-hashes the
-attempt and compares. Session cookies are signed, so they can be read
-but not forged. Post authorship comes from the session, not the client.
+attempt and compares. The session lives in a cookie signed with the
+app's secret key, so users can read it but can't forge or alter it.
+Post authorship comes from the signed session, never from form data.
 
 ## Run locally
 ```
@@ -40,9 +43,8 @@ restarts. Render's free tier wipes the disk on each deploy, so use a
 persistent disk or a different database there.
 
 ## Built with
-Python, SQL, HTML
- — AI-accelerated scaffolding with
-human-owned auth and data logic.
+Python (Flask), SQL (SQLite), HTML and CSS. AI-accelerated scaffolding
+with human-owned auth and data logic.
 
 Originally built at All Star Code (2023); rebuilt with real
 authentication and a relational database, 2026.
