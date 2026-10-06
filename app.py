@@ -8,11 +8,17 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "forum.db"))
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    # Without a real key, anyone could forge a session cookie and post as any user.
+    if os.environ.get("FLASK_DEBUG") != "1":
+        raise RuntimeError("SECRET_KEY must be set (or FLASK_DEBUG=1 for local development).")
+    app.secret_key = "dev-secret-key-change-me"
 
 # Each user may make at most POST_LIMIT posts in any POST_WINDOW_MINUTES.
 POST_LIMIT = 5
 POST_WINDOW_MINUTES = 10
+MAX_POST_LENGTH = 2000
 
 
 def get_db():
@@ -48,16 +54,17 @@ def register():
             return render_template("register.html", error="Username and password are required.")
 
         db = get_db()
-        existing = db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
-        if existing:
-            return render_template("register.html", error="That username is already taken.")
-
         password_hash = generate_password_hash(password)
-        db.execute(
-            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            (username, password_hash),
-        )
-        db.commit()
+        try:
+            db.execute(
+                "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+                (username, password_hash),
+            )
+            db.commit()
+        except sqlite3.IntegrityError:
+            # The UNIQUE constraint is the source of truth, so two simultaneous
+            # signups for the same name can't both get through.
+            return render_template("register.html", error="That username is already taken.")
         return redirect(url_for("login"))
 
     return render_template("register.html")
@@ -104,7 +111,10 @@ def index():
             """,
             (session["user_id"], f"-{POST_WINDOW_MINUTES} minutes"),
         ).fetchone()[0]
-        if recent >= POST_LIMIT:
+        if len(content) > MAX_POST_LENGTH:
+            error = f"Posts can be at most {MAX_POST_LENGTH} characters."
+            draft = content
+        elif recent >= POST_LIMIT:
             error = (
                 f"You can post up to {POST_LIMIT} times every "
                 f"{POST_WINDOW_MINUTES} minutes. Try again in a few minutes."
