@@ -1,11 +1,14 @@
+import os
 import sqlite3
+
 from flask import Flask, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-DATABASE = "forum.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "forum.db"))
 
 app = Flask(__name__)
-app.secret_key = "dev-secret-key-change-me"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
 
 def get_db():
@@ -24,9 +27,12 @@ def close_db(_exception=None):
 
 def init_db():
     db = sqlite3.connect(DATABASE)
-    with open("schema.sql") as f:
+    with open(os.path.join(BASE_DIR, "schema.sql")) as f:
         db.executescript(f.read())
     db.close()
+
+
+init_db()
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -107,8 +113,4 @@ def index():
 
 
 if __name__ == "__main__":
-    import os
-
-    if not os.path.exists(DATABASE):
-        init_db()
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
