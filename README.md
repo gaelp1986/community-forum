@@ -39,8 +39,7 @@ restarts. Render's free tier wipes the disk on each deploy, so use a
 persistent disk or a different database there.
 
 ## Built with
-Python, SQL, HTML, developed using an AI-assisted workflow with
-Claude Code (Anthropic "Claude Code in Action" certified)
+Python, SQL, HTML
  — AI-accelerated scaffolding with
 human-owned auth and data logic.
 
