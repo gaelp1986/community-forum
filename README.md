@@ -5,6 +5,7 @@ Full-stack forum with user authentication — Flask, SQLite, vanilla JS/HTML/CSS
 - User registration & login with salted password hashing (werkzeug)
 - Server-side sessions via signed cookies
 - Post feed with author attribution (SQL JOIN across users/posts)
+- Public read-only feed; posting requires an account
 
 ## Auth design
 Passwords are never stored — only salted hashes. Login re-hashes the

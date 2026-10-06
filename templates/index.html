@@ -8,14 +8,20 @@
 <body>
   <header>
     <h1>Community Forum</h1>
-    <p class="session-info">logged in as {{ username }} · <a href="{{ url_for('logout') }}">logout</a></p>
+    {% if username %}
+      <p class="session-info">logged in as {{ username }} · <a href="{{ url_for('logout') }}">logout</a></p>
+    {% else %}
+      <p class="session-info"><a href="{{ url_for('login') }}">log in</a> · <a href="{{ url_for('register') }}">register</a></p>
+    {% endif %}
   </header>
 
   <main>
-    <form method="POST" class="post-form">
-      <textarea name="content" placeholder="Share something with the community..." required></textarea>
-      <button type="submit">Post</button>
-    </form>
+    {% if username %}
+      <form method="POST" class="post-form">
+        <textarea name="content" placeholder="Share something with the community..." required></textarea>
+        <button type="submit">Post</button>
+      </form>
+    {% endif %}
 
     <section class="feed">
       {% for post in posts %}

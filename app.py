@@ -80,17 +80,16 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
     db = get_db()
 
     if request.method == "POST":
+        if "user_id" not in session:
+            return redirect(url_for("login"))
         content = request.form["content"].strip()
         if content:
             db.execute(
@@ -109,7 +108,7 @@ def index():
         """
     ).fetchall()
 
-    return render_template("index.html", posts=posts, username=session["username"])
+    return render_template("index.html", posts=posts, username=session.get("username"))
 
 
 if __name__ == "__main__":
