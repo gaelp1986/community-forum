@@ -1,4 +1,6 @@
 # The Stoop
+[![tests](https://github.com/gaelp1986/community-forum/actions/workflows/tests.yml/badge.svg)](https://github.com/gaelp1986/community-forum/actions/workflows/tests.yml)
+
 A full-stack community discussion forum with user authentication — Flask, SQLite, HTML/CSS.
 
 **Live:** https://gaelp2807.pythonanywhere.com
@@ -25,6 +27,15 @@ FLASK_DEBUG=1 python app.py
 ```
 Then visit http://localhost:5000
 
+## Tests
+```
+pytest
+```
+The suite covers registration, login/logout, posting, HTML escaping,
+the post length limit and the per-user rate limit. Each test gets a
+fresh SQLite database through the `create_app` factory. GitHub Actions
+runs it on every push and pull request.
+
 ## Deploy
 The app reads its configuration from environment variables:
 
@@ -37,7 +48,7 @@ The app reads its configuration from environment variables:
 Tables are created automatically on startup. In production, run with
 gunicorn instead of `python app.py`:
 ```
-gunicorn app:app
+gunicorn "app:create_app()"
 ```
 SQLite needs a persistent disk. PythonAnywhere keeps files between
 restarts. Render's free tier wipes the disk on each deploy, so use a
