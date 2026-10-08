@@ -16,6 +16,9 @@
   </header>
 
   <main>
+    {% for message in get_flashed_messages() %}
+      <p class="error">{{ message }}</p>
+    {% endfor %}
     {% if username %}
       <form method="POST" class="post-form">
         {% if error %}<p class="error">{{ error }}</p>{% endif %}
@@ -26,9 +29,23 @@
 
     <section class="feed">
       {% for post in posts %}
-        <article class="post">
+        <article class="post" id="post-{{ post.id }}">
           <p class="post-content">{{ post.content }}</p>
           <p class="post-meta">{{ post.username }} · {{ post.created_at }}</p>
+
+          {% for reply in replies_by_post.get(post.id, []) %}
+            <div class="reply">
+              <p class="reply-content">{{ reply.content }}</p>
+              <p class="post-meta">{{ reply.username }} · {{ reply.created_at }}</p>
+            </div>
+          {% endfor %}
+
+          {% if username %}
+            <form method="POST" action="{{ url_for('reply', post_id=post.id) }}" class="reply-form">
+              <input type="text" name="content" placeholder="Write a reply..." maxlength="2000" required>
+              <button type="submit">Reply</button>
+            </form>
+          {% endif %}
         </article>
       {% else %}
         <p class="empty">No posts yet. Be the first to say something.</p>

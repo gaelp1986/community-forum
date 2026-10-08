@@ -155,3 +155,43 @@ main {
   border-radius: 6px;
   font-size: 0.9rem;
 }
+
+.reply {
+  margin: 0.75rem 0 0 1rem;
+  padding-left: 0.9rem;
+  border-left: 3px solid #e1e4e8;
+}
+
+.reply-content {
+  margin: 0 0 0.25rem;
+  white-space: pre-wrap;
+}
+
+.reply-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.reply-form input {
+  flex: 1;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.reply-form button {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.reply-form button:hover {
+  background: #333;
+}
