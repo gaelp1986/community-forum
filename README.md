@@ -10,7 +10,8 @@ A full-stack community discussion forum with user authentication — Flask, SQLi
 - Sessions stored in signed cookies
 - Post feed with author attribution (SQL JOIN across users/posts)
 - Public read-only feed; posting requires an account
-- Per-user rate limit on posting (5 posts per 10 minutes)
+- Replies on any post, shown threaded under it (separate table, JOINed to users)
+- Per-user rate limit on posting and replying (5 each per 10 minutes)
 
 ## Auth design
 Passwords are never stored — only salted hashes. Login re-hashes the
@@ -31,8 +32,8 @@ Then visit http://localhost:5000
 ```
 pytest
 ```
-The suite covers registration, login/logout, posting, HTML escaping,
-the post length limit and the per-user rate limit. Each test gets a
+The suite covers registration, login/logout, posting, replies, HTML escaping,
+the length limit and the per-user rate limits. Each test gets a
 fresh SQLite database through the `create_app` factory. GitHub Actions
 runs it on every push and pull request.
 

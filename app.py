@@ -1,7 +1,9 @@
 import os
 import sqlite3
 
-from flask import Flask, current_app, g, redirect, render_template, request, session, url_for
+from flask import (
+    Flask, abort, current_app, flash, g, redirect, render_template, request, session, url_for,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -132,17 +134,60 @@ def create_app(test_config=None):
             SELECT posts.id, posts.content, posts.created_at, users.username
             FROM posts
             JOIN users ON posts.user_id = users.id
-            ORDER BY posts.created_at DESC
+            ORDER BY posts.created_at DESC, posts.id DESC
             """
         ).fetchall()
+
+        replies_by_post = {}
+        for reply in db.execute(
+            """
+            SELECT replies.post_id, replies.content, replies.created_at, users.username
+            FROM replies
+            JOIN users ON replies.user_id = users.id
+            ORDER BY replies.created_at ASC, replies.id ASC
+            """
+        ).fetchall():
+            replies_by_post.setdefault(reply["post_id"], []).append(reply)
 
         return render_template(
             "index.html",
             posts=posts,
+            replies_by_post=replies_by_post,
             username=session.get("username"),
             error=error,
             draft=draft,
         )
+
+    @app.route("/post/<int:post_id>/reply", methods=["POST"])
+    def reply(post_id):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        db = get_db()
+        if db.execute("SELECT 1 FROM posts WHERE id = ?", (post_id,)).fetchone() is None:
+            abort(404)
+
+        content = request.form["content"].strip()
+        recent = db.execute(
+            """
+            SELECT COUNT(*) FROM replies
+            WHERE user_id = ? AND created_at > datetime('now', ?)
+            """,
+            (session["user_id"], f"-{POST_WINDOW_MINUTES} minutes"),
+        ).fetchone()[0]
+        if len(content) > MAX_POST_LENGTH:
+            flash(f"Replies can be at most {MAX_POST_LENGTH} characters.")
+        elif recent >= POST_LIMIT:
+            flash(
+                f"You can reply up to {POST_LIMIT} times every "
+                f"{POST_WINDOW_MINUTES} minutes. Try again in a few minutes."
+            )
+        elif content:
+            db.execute(
+                "INSERT INTO replies (post_id, user_id, content) VALUES (?, ?, ?)",
+                (post_id, session["user_id"], content),
+            )
+            db.commit()
+        return redirect(url_for("index") + f"#post-{post_id}")
 
     return app
 
